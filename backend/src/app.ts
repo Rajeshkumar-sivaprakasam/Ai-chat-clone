@@ -15,6 +15,6 @@ app.use(express.json())
 app.use(morgon('Dev'))
 
 // router middleware
-app.use("app/v1",appRouter)
+app.use("/app/v1",appRouter)
 
 export default app;
