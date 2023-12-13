@@ -1,4 +1,5 @@
-import {createContext, ReactNode, useContext, useState} from 'react';
+import { createContext, ReactNode, useContext, useState } from "react";
+import { loginUser } from "../helpers/api-communicator";
 
 type User = {
   name: string;
@@ -12,16 +13,21 @@ type UserAuth = {
   logout: () => Promise<void>;
 };
 
-const AuthContext = createContext<UserAuth | null>(null)
+const AuthContext = createContext<UserAuth | null>(null);
 
-export const AuthProvoider = ({children}:{children:ReactNode}) => {
-  const [user,setUser] = useState<User | null>(null);
-  const [isLoggedIn,setIsLoggedin] = useState(false);
+export const AuthProvoider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const login = async(email:string,password:string) =>{}
-  const signup = async(name:string,email:string,password:string) =>{}
-  const logout = async() =>{}
-
+  const login = async (email: string, password: string) => {
+    const data = await loginUser(email, password);
+    if (data) {
+      setUser({ email: data.email, name: data.name });
+      setIsLoggedIn(true);
+    }
+  };
+  const signup = async (name: string, email: string, password: string) => {};
+  const logout = async () => {};
 
   const value = {
     user,
@@ -31,7 +37,6 @@ export const AuthProvoider = ({children}:{children:ReactNode}) => {
     signup,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+};
 
-export const useAuth = () => useContext(AuthContext)
-
+export const useAuth = () => useContext(AuthContext);

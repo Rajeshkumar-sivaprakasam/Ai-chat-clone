@@ -32,39 +32,40 @@ export const userSignUp = async (
 ) => {
   try {
     const { name, email, password } = req.body;
-    const exsistingUser = await User.findOne({email})
-    if(exsistingUser) return res.status(401).send('User Already exsisted!')
+    const exsistingUser = await User.findOne({ email });
+    if (exsistingUser) return res.status(401).send("User Already exsisted!");
     // hashed password
     const hashedPassword = await hash(password, 10);
 
     // save new user to database
-    const user = new User({name,email,password:hashedPassword});
-    await user.save() // saving to db
+    const user = new User({ name, email, password: hashedPassword });
+    await user.save(); // saving to db
 
     // clear cookie for everytime
-    res.cookie(COOKIE_NAME,{
-        domain:'localhost',
-        httpOnly:true,
-        path:'/',
-        signed:true,
-    })
+    res.cookie(COOKIE_NAME, {
+      domain: "localhost",
+      httpOnly: true,
+      path: "/",
+      signed: true,
+    });
     // getting new Token
-    const token = getToken(user._id.toString(),user.email,'7d');
+    const token = getToken(user._id.toString(), user.email, "7d");
     const expires = new Date();
     expires.setDate(expires.getDate() + 7);
-    res.cookie(COOKIE_NAME,token,{
-        domain:'localhost',
-        expires:expires,
-        httpOnly:true,
-        path:'/',
-        signed:true,
-    })
+    res.cookie(COOKIE_NAME, token, {
+      domain: "localhost",
+      expires: expires,
+      httpOnly: true,
+      path: "/",
+      signed: true,
+    });
     return res.status(201).json({
       message: "ok",
-      userId:user._id.toString()
+      email: user.email.toString(),
+      name: user.name.toString(),
     });
-} catch (error) {
-      console.log(error);
+  } catch (error) {
+    console.log(error);
     return res.status(200).json({
       message: "Failed to signup user!",
       cause: error.message, // return casuse messaage of that error
@@ -78,39 +79,39 @@ export const userLogin = async (
   next: NextFunction
 ) => {
   try {
-    const {  email, password } = req.body;
-    const user = await User.findOne({email})
-    if(!user) return res.status(401).send('User not registered!')
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).send("User not registered!");
     // decrypt password check
     const isPasswordCorrect = await compare(password, user.password);
-    if(!isPasswordCorrect){
-        return res.status(403).send("Incorrect username,password")
+    if (!isPasswordCorrect) {
+      return res.status(403).send("Incorrect username,password");
     }
     // clear cookie for everytime
-    res.cookie(COOKIE_NAME,{
-        domain:'localhost',
-        httpOnly:true,
-        path:'/',
-        signed:true,
-    })
+    res.cookie(COOKIE_NAME, {
+      domain: "localhost",
+      httpOnly: true,
+      path: "/",
+      signed: true,
+    });
     // getting new Token
-    const token = getToken(user._id.toString(),user.email,'7d');
+    const token = getToken(user._id.toString(), user.email, "7d");
     const expires = new Date();
     expires.setDate(expires.getDate() + 7);
-    res.cookie(COOKIE_NAME,token,{
-        domain:'localhost',
-        expires:expires,
-        httpOnly:true,
-        path:'/',
-        signed:true,
-    })
-    return res.status(200).json({
-        message:'success',
-        userId:user._id.toString()
-
+    res.cookie(COOKIE_NAME, token, {
+      domain: "localhost",
+      expires: expires,
+      httpOnly: true,
+      path: "/",
+      signed: true,
     });
-} catch (error) {
-      console.log(error);
+    return res.status(200).json({
+      message: "success",
+      email: user.email.toString(),
+      name: user.name.toString(),
+    });
+  } catch (error) {
+    console.log(error);
     return res.status(200).json({
       message: "Failed to validate user",
       cause: error.message, // return casuse messaage of that error
